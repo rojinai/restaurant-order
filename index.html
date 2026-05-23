@@ -165,12 +165,80 @@
       align-items: center;
       gap: 14px;
       border: 1px solid var(--cream-line);
-      transition: box-shadow 0.2s, transform 0.1s;
+      transition: box-shadow 0.2s, transform 0.1s, border-color 0.2s;
+      opacity: 0;
+      animation: cardIn 0.4s ease-out forwards;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .item.has-qty {
       box-shadow: var(--shadow-md);
       border-color: var(--brass-light);
+      background: linear-gradient(135deg, #FFFDF8 0%, #FFF8E8 100%);
+    }
+
+    /* Icon tile — emoji with a token-color corner dot */
+    .item-icon {
+      position: relative;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--bg) 0%, #F3E9D2 100%);
+      border: 1px solid var(--cream-line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .item-emoji {
+      font-size: 28px;
+      line-height: 1;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    .item.has-qty .item-icon {
+      transform: scale(1.06);
+      background: linear-gradient(135deg, #FFF3D6 0%, #FFE9B8 100%);
+      border-color: var(--brass-light);
+    }
+
+    .item.has-qty .item-emoji {
+      animation: emojiPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes emojiPop {
+      0%   { transform: scale(1) rotate(0deg); }
+      45%  { transform: scale(1.32) rotate(-8deg); }
+      70%  { transform: scale(0.94) rotate(4deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    /* Token color dot — small corner indicator on the icon tile */
+    .token-dot {
+      position: absolute;
+      bottom: -3px;
+      right: -3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2.5px solid var(--bg-card);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .item.has-qty .token-dot {
+      animation: dotPulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes dotPulse {
+      0%, 100% { box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+      50%      { box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 0 0 4px rgba(184,137,61,0.18); }
     }
 
     .token-badge {
@@ -187,9 +255,19 @@
     .token-red { background: var(--red-token); }
     .token-yellow { background: var(--yellow-token); }
     .token-blue { background: #1565C0; }
-    .token-brown { background: #964B00; }
-    .token-orange { background: #FFA500; }
-    .token-golden { background: #FFD700; }
+    .token-brown { background: #5D4037; }
+    .token-orange { background: #E65100; }
+    .token-golden { background: #C8A415; border-color: #8a7000; }
+
+    /* token-dot needs solid backgrounds, not the inset shadows of token-badge */
+    .token-dot.token-green { background: var(--green-token); }
+    .token-dot.token-white { background: #FFFFFF; border-color: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 0 0 1px #ccc; }
+    .token-dot.token-red { background: var(--red-token); }
+    .token-dot.token-yellow { background: var(--yellow-token); }
+    .token-dot.token-blue { background: #1565C0; }
+    .token-dot.token-brown { background: #5D4037; }
+    .token-dot.token-orange { background: #E65100; }
+    .token-dot.token-golden { background: #C8A415; }
 
     .item-info { min-width: 0; }
 
@@ -417,6 +495,7 @@
 
     .qr-status.dynamic { color: var(--green-token); font-weight: 600; }
     .qr-status.fallback { color: var(--brass); font-weight: 600; }
+    .qr-status.manual { color: var(--green-token); font-weight: 700; font-size: 13px; letter-spacing: 0.2px; }
     .qr-status.error { color: var(--red); font-weight: 600; }
 
     .merchant-name {
@@ -457,6 +536,12 @@
     }
 
     .order-line + .order-line { border-top: 1px solid var(--cream-line); }
+
+    .order-line-emoji {
+      font-size: 18px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
 
     .order-line .token-badge {
       width: 16px;
@@ -630,7 +715,9 @@
       .container { padding: 18px 12px 120px; }
       .header h1 { font-size: 24px; }
       .pay-amount { font-size: 36px; }
-      .item { padding: 14px 14px; gap: 10px; }
+      .item { padding: 14px 12px; gap: 10px; }
+      .item-icon { width: 46px; height: 46px; }
+      .item-emoji { font-size: 24px; }
       .qty-btn { width: 34px; height: 34px; font-size: 20px; }
       #qr-code { width: 200px; height: 200px; }
     }
@@ -638,6 +725,41 @@
     /* High-contrast / outdoor visibility for amount */
     @media (prefers-contrast: more) {
       .pay-amount, .total-amount { color: #000; }
+    }
+
+    /* Staggered entrance — each menu card fades in slightly after the previous */
+    .item:nth-child(1) { animation-delay: 0.00s; }
+    .item:nth-child(2) { animation-delay: 0.06s; }
+    .item:nth-child(3) { animation-delay: 0.12s; }
+    .item:nth-child(4) { animation-delay: 0.18s; }
+    .item:nth-child(5) { animation-delay: 0.24s; }
+    .item:nth-child(6) { animation-delay: 0.30s; }
+    .item:nth-child(7) { animation-delay: 0.36s; }
+    .item:nth-child(8) { animation-delay: 0.42s; }
+
+    /* QR gentle entrance on payment screen */
+    .qr-wrapper { animation: qrIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes qrIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* Total amount on pay screen — soft attention pulse once */
+    .pay-amount { animation: amountIn 0.5s ease-out; }
+    @keyframes amountIn {
+      0%   { opacity: 0; transform: scale(0.7); }
+      60%  { transform: scale(1.08); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Respect users who prefer no motion — disable all animation */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .item { opacity: 1; }
     }
   </style>
 </head>
@@ -696,7 +818,7 @@
           <h3>How to Pay</h3>
           <ol>
             <li>Scan with eSewa, Khalti, IME Pay, ConnectIPS, or any banking app</li>
-            <li>Verify the amount shown matches Rs. <span id="inst-amount">0</span></li>
+            <li>Check the amount shows <strong>Rs. <span id="inst-amount">0</span></strong></li>
             <li>Complete the payment in your app</li>
             <li>Show this screen + your payment confirmation at the counter</li>
             <li>Collect your color tokens — sit anywhere — wait for food</li>
@@ -750,19 +872,18 @@
        Upload your printed Fonepay merchant QR image
        Copy the entire decoded TEXT (starts with "0002" or "00020...")
        Paste it between the quotes below. Save. Done. */
-    const FONEPAY_QR_DATA = '00020101021126350011fonepay.com071622220300079132755204565153035245802NP5916NANU MAYA TAMANG6012Kathmandu MP621007068071756304f09d'; // <-- PASTE YOUR FONEPAY QR DATA HERE
+    const FONEPAY_QR_DATA = '00020101021126350011fonepay.com071622220300079132755204565153035245802NP5916NANU MAYA TAMANG6012Kathmandu MP621007068071756304f09d'; // <-- Nanu Maya Tamang Fonepay QR
 
     /* Menu — prices in NPR */
     const MENU = [
-      { id: 'veg',     name: 'Veg Khana',     nameNp: 'शाकाहारी खाना',  price: 150, token: 'green',  tokenLabel: 'Green' },
-      { id: 'chicken', name: 'Chicken Khana', nameNp: 'कुखुरा खाना',     price: 220, token: 'white',  tokenLabel: 'White' },
-      { id: 'buff',    name: 'Buff Khana',    nameNp: 'राँगा खाना',      price: 220, token: 'red',    tokenLabel: 'Red' },
-      { id: 'mutton',  name: 'Mutton Khana',  nameNp: 'खसी खाना',        price: 290, token: 'yellow', tokenLabel: 'Yellow' },
-      { id: 'Water', name: 'Mineral Water', nameNp: 'मिनरल वाटर', price: 25, token: 'blue', tokenLabel: 'Blue' },
-      { id: 'Drinks', name: 'Soft Drinks', nameNp: 'चिसो', price: 65, token: 'brown', tokenLabel: 'Brown' },
-      { id: 'Cigarette', name: 'Shikhar Ice', nameNp: 'शिखर आइस', price: 20, token: 'orange', tokenLabel: 'Orange' },
-      { id: 'Churot', name: 'Surya', nameNp: 'सूर्य', price: 25, token: 'golden', tokenLabel: 'Golden' },
-      
+      { id: 'veg',       name: 'Veg Khana',     nameNp: 'शाकाहारी खाना', price: 150, token: 'green',  tokenLabel: 'Green',  emoji: '🥗' },
+      { id: 'chicken',   name: 'Chicken Khana', nameNp: 'कुखुरा खाना',   price: 220, token: 'white',  tokenLabel: 'White',  emoji: '🍗' },
+      { id: 'buff',      name: 'Buff Khana',    nameNp: 'राँगा खाना',    price: 220, token: 'red',    tokenLabel: 'Red',    emoji: '🥩' },
+      { id: 'mutton',    name: 'Mutton Khana',  nameNp: 'खसी खाना',      price: 290, token: 'yellow', tokenLabel: 'Yellow', emoji: '🍖' },
+      { id: 'water',     name: 'Mineral Water', nameNp: 'मिनरल वाटर',    price: 25,  token: 'blue',   tokenLabel: 'Blue',   emoji: '💧' },
+      { id: 'drinks',    name: 'Soft Drinks',   nameNp: 'चिसो',          price: 65,  token: 'brown',  tokenLabel: 'Brown',  emoji: '🥤' },
+      { id: 'shikhar',   name: 'Shikhar Ice',   nameNp: 'शिखर आइस',      price: 20,  token: 'orange', tokenLabel: 'Orange', emoji: '🚬' },
+      { id: 'surya',     name: 'Surya',         nameNp: 'सूर्य',          price: 25,  token: 'golden', tokenLabel: 'Golden', emoji: '🚬' },
     ];
 
     const MAX_QTY_PER_ITEM = 20; // hard cap to prevent absurd input
@@ -831,10 +952,13 @@
       return qr;
     }
 
-    /* Convert static Fonepay QR to dynamic with an embedded amount.
+    /* Convert static Fonepay QR to dynamic with an embedded amount + custom remark.
        Tag 01 = Point of Initiation Method ("11"=static, "12"=dynamic)
-       Tag 54 = Transaction Amount (e.g. "150.00") */
-    function makeDynamicFonepayQr(staticQr, amount) {
+       Tag 54 = Transaction Amount (e.g. "150.00")
+       Tag 62 = Additional Data Field; sub-tag 08 = Purpose of Transaction (the remark)
+       Note: the customer's wallet app decides whether to show/lock/ignore the remark.
+       Some apps display it, some let the customer overwrite it, some ignore tag 62. */
+    function makeOrderQr(staticQr, amount, remark) {
       const tags = parseEmvQr(staticQr);
       if (tags.length === 0) {
         throw new Error('Invalid Fonepay QR data');
@@ -851,7 +975,33 @@
       if (amt) { amt.value = amountStr; }
       else { tags.push({ tag: '54', value: amountStr }); }
 
+      // Tag 62 — preserve any existing Fonepay sub-tags, add/replace sub-tag 08 (remark).
+      // EMVCo caps sub-tag 08 at 25 chars; truncate defensively.
+      const r = String(remark || '').slice(0, 25);
+      let t62 = tags.find(t => t.tag === '62');
+      let subTags = t62 ? parseEmvQr(t62.value) : [];
+      let sub08 = subTags.find(s => s.tag === '08');
+      if (sub08) { sub08.value = r; }
+      else { subTags.push({ tag: '08', value: r }); }
+      subTags.sort((a, b) => parseInt(a.tag, 10) - parseInt(b.tag, 10));
+      let t62val = '';
+      for (const s of subTags) {
+        t62val += s.tag + s.value.length.toString().padStart(2, '0') + s.value;
+      }
+      if (t62) { t62.value = t62val; }
+      else { tags.push({ tag: '62', value: t62val }); }
+
       return buildEmvQr(tags);
+    }
+
+    /* Build the remark string: "TOKEN YYYY-MM-DD HH:MM" — 21 chars, fits the 25 cap */
+    function buildRemark(orderId, date) {
+      const y = date.getFullYear();
+      const mo = (date.getMonth() + 1).toString().padStart(2, '0');
+      const d = date.getDate().toString().padStart(2, '0');
+      const h = date.getHours().toString().padStart(2, '0');
+      const mi = date.getMinutes().toString().padStart(2, '0');
+      return orderId + ' ' + y + '-' + mo + '-' + d + ' ' + h + ':' + mi;
     }
 
     /* ============================================================
@@ -889,11 +1039,21 @@
         card.className = 'item';
         card.dataset.id = item.id;
 
-        // Token badge
-        const badge = document.createElement('div');
-        badge.className = 'token-badge token-' + item.token;
-        badge.setAttribute('aria-hidden', 'true');
-        card.appendChild(badge);
+        // Icon tile — emoji with a token-color corner dot
+        const iconTile = document.createElement('div');
+        iconTile.className = 'item-icon';
+        iconTile.setAttribute('aria-hidden', 'true');
+
+        const emoji = document.createElement('span');
+        emoji.className = 'item-emoji';
+        emoji.textContent = item.emoji || '🍛';
+        iconTile.appendChild(emoji);
+
+        const dot = document.createElement('div');
+        dot.className = 'token-dot token-' + item.token;
+        iconTile.appendChild(dot);
+
+        card.appendChild(iconTile);
 
         // Info
         const info = document.createElement('div');
@@ -1024,6 +1184,12 @@
         const line = document.createElement('div');
         line.className = 'order-line';
 
+        const lineEmoji = document.createElement('span');
+        lineEmoji.className = 'order-line-emoji';
+        lineEmoji.textContent = item.emoji || '🍛';
+        lineEmoji.setAttribute('aria-hidden', 'true');
+        line.appendChild(lineEmoji);
+
         const badge = document.createElement('div');
         badge.className = 'token-badge token-' + item.token;
         line.appendChild(badge);
@@ -1074,17 +1240,21 @@
         return;
       }
 
-      // Attempt dynamic QR (with embedded amount)
+      // Build the order QR: embeds the amount AND a custom remark into the
+      // Fonepay QR. The remark carries the order token + date + time, so it
+      // shows up in the customer's wallet payment record and (for wallets
+      // that display it) helps tie a payment back to a specific order.
+      // Format of remark: "TOKEN YYYY-MM-DD HH:MM"
+      const remark = buildRemark(currentOrderId, currentOrderTime || new Date());
+
       let qrString = null;
-      let isDynamic = false;
       try {
-        qrString = makeDynamicFonepayQr(qrData, amount);
-        isDynamic = true;
+        qrString = makeOrderQr(qrData, amount, remark);
       } catch (e) {
-        console.warn('Dynamic QR generation failed:', e.message);
-        // Fall back to static QR
-        qrString = qrData;
-        isDynamic = false;
+        console.error('QR build failed:', e.message);
+        statusEl.className = 'qr-status error';
+        statusEl.textContent = 'QR generation failed. Please check the Fonepay QR data, or pay at counter.';
+        return;
       }
 
       // Render
@@ -1095,16 +1265,10 @@
           height: 232,
           colorDark: '#1F1B16',
           colorLight: '#FFFFFF',
-          correctLevel: QRCode.CorrectLevel.M, // medium error correction
+          correctLevel: QRCode.CorrectLevel.M,
         });
-
-        if (isDynamic) {
-          statusEl.className = 'qr-status dynamic';
-          statusEl.textContent = '✓ Amount embedded — scan and confirm';
-        } else {
-          statusEl.className = 'qr-status fallback';
-          statusEl.textContent = '⚠ Enter amount manually after scanning';
-        }
+        statusEl.className = 'qr-status dynamic';
+        statusEl.textContent = '✓ Amount Rs. ' + amount.toLocaleString('en-IN') + ' — scan and confirm';
       } catch (e) {
         statusEl.className = 'qr-status error';
         statusEl.textContent = 'QR rendering failed. Please pay at counter.';
